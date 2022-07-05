@@ -1,0 +1,200 @@
+[root@ip-172-31-30-193 ~]# git clone https://github.com/ashishrpandey/example-voting-app
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 494, done.
+remote: Total 494 (delta 0), reused 0 (delta 0), pack-reused 494
+Receiving objects: 100% (494/494), 236.17 KiB | 1.03 MiB/s, done.
+Resolving deltas: 100% (179/179), done.
+[root@ip-172-31-30-193 ~]#
+[root@ip-172-31-30-193 ~]#
+[root@ip-172-31-30-193 ~]# cd example-voting-app/
+.git/               .github/            k8s-specifications/ result/             vote/               worker/
+[root@ip-172-31-30-193 ~]# cd example-voting-app/k8s-specifications/
+[root@ip-172-31-30-193 k8s-specifications]#  kubectl apply -f .
+deployment.apps/db created
+service/db created
+deployment.apps/redis created
+service/redis created
+deployment.apps/result created
+service/result created
+deployment.apps/vote created
+service/vote created
+deployment.apps/worker created
+[root@ip-172-31-30-193 k8s-specifications]#
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running   0          39s
+redis-868d64d78-nkz4x     1/1     Running   0          39s
+result-5d57b59f4b-j4jx5   1/1     Running   0          39s
+vote-94849dc97-qhtxt      1/1     Running   0          39s
+worker-dd46d7584-28fxw    1/1     Running   0          39s
+[root@ip-172-31-30-193 k8s-specifications]#
+[root@ip-172-31-30-193 k8s-specifications]#
+[root@ip-172-31-30-193 k8s-specifications]# ls
+db-deployment.yaml  redis-deployment.yaml  result-deployment.yaml  vote-deployment.yaml  worker-deployment.yaml
+db-service.yaml     redis-service.yaml     result-service.yaml     vote-service.yaml
+[root@ip-172-31-30-193 k8s-specifications]# car vote-service.yaml
+-bash: car: command not found
+[root@ip-172-31-30-193 k8s-specifications]# cat vote-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote
+spec:
+  type: NodePort
+  ports:
+  - name: "vote-service"
+    port: 5000
+    targetPort: 80
+    nodePort: 31000
+  selector:
+    app: vote
+
+[root@ip-172-31-30-193 k8s-specifications]# cat result-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: result
+spec:
+  type: NodePort
+  ports:
+  - name: "result-service"
+    port: 5001
+    targetPort: 80
+    nodePort: 31001
+  selector:
+    app: result
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running   0          35m
+redis-868d64d78-nkz4x     1/1     Running   0          35m
+result-5d57b59f4b-j4jx5   1/1     Running   0          35m
+vote-94849dc97-qhtxt      1/1     Running   0          35m
+worker-dd46d7584-28fxw    1/1     Running   0          35m
+[root@ip-172-31-30-193 k8s-specifications]# kubectl delete po vote-94849dc97-qhtxt
+pod "vote-94849dc97-qhtxt" deleted
+^C
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS              RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running             0          36m
+redis-868d64d78-nkz4x     1/1     Running             0          36m
+result-5d57b59f4b-j4jx5   1/1     Running             0          36m
+vote-94849dc97-qhtxt      1/1     Terminating         0          36m
+vote-94849dc97-w6wxr      0/1     ContainerCreating   0          5s
+worker-dd46d7584-28fxw    1/1     Running             0          36m
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running   0          36m
+redis-868d64d78-nkz4x     1/1     Running   0          36m
+result-5d57b59f4b-j4jx5   1/1     Running   0          36m
+vote-94849dc97-w6wxr      1/1     Running   0          42s
+worker-dd46d7584-28fxw    1/1     Running   0          36m
+[root@ip-172-31-30-193 k8s-specifications]# kubectl delete po worker-dd46d7584-28fxw
+pod "worker-dd46d7584-28fxw" deleted
+^C
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running       0          37m
+redis-868d64d78-nkz4x     1/1     Running       0          37m
+result-5d57b59f4b-j4jx5   1/1     Running       0          37m
+vote-94849dc97-w6wxr      1/1     Running       0          2m3s
+worker-dd46d7584-28fxw    1/1     Terminating   0          37m
+worker-dd46d7584-rp9h7    1/1     Running       0          29s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running       0          38m
+redis-868d64d78-nkz4x     1/1     Running       0          38m
+result-5d57b59f4b-j4jx5   1/1     Running       0          38m
+vote-94849dc97-w6wxr      1/1     Running       0          2m8s
+worker-dd46d7584-28fxw    0/1     Terminating   0          38m
+worker-dd46d7584-rp9h7    1/1     Running       0          34s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running   0          38m
+redis-868d64d78-nkz4x     1/1     Running   0          38m
+result-5d57b59f4b-j4jx5   1/1     Running   0          38m
+vote-94849dc97-w6wxr      1/1     Running   0          2m10s
+worker-dd46d7584-rp9h7    1/1     Running   0          36s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-fmtzc        1/1     Running   0          38m
+redis-868d64d78-nkz4x     1/1     Running   0          38m
+result-5d57b59f4b-j4jx5   1/1     Running   0          38m
+vote-94849dc97-w6wxr      1/1     Running   0          2m12s
+worker-dd46d7584-rp9h7    1/1     Running   0          38s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl delete po db-b54cd94f4-fmtzc
+pod "db-b54cd94f4-fmtzc" deleted
+^C
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running       0          31s
+db-b54cd94f4-fmtzc        1/1     Terminating   0          39m
+redis-868d64d78-nkz4x     1/1     Running       0          39m
+result-5d57b59f4b-j4jx5   1/1     Running       0          39m
+vote-94849dc97-w6wxr      1/1     Running       0          3m8s
+worker-dd46d7584-rp9h7    1/1     Running       0          94s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running       0          34s
+db-b54cd94f4-fmtzc        1/1     Terminating   0          39m
+redis-868d64d78-nkz4x     1/1     Running       0          39m
+result-5d57b59f4b-j4jx5   1/1     Running       0          39m
+vote-94849dc97-w6wxr      1/1     Running       0          3m11s
+worker-dd46d7584-rp9h7    1/1     Running       0          97s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running       0          35s
+db-b54cd94f4-fmtzc        0/1     Terminating   0          39m
+redis-868d64d78-nkz4x     1/1     Running       0          39m
+result-5d57b59f4b-j4jx5   1/1     Running       0          39m
+vote-94849dc97-w6wxr      1/1     Running       0          3m12s
+worker-dd46d7584-rp9h7    1/1     Running       0          98s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running       0          37s
+db-b54cd94f4-fmtzc        0/1     Terminating   0          39m
+redis-868d64d78-nkz4x     1/1     Running       0          39m
+result-5d57b59f4b-j4jx5   1/1     Running       0          39m
+vote-94849dc97-w6wxr      1/1     Running       0          3m14s
+worker-dd46d7584-rp9h7    0/1     Error         0          100s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running       0          38s
+db-b54cd94f4-fmtzc        0/1     Terminating   0          39m
+redis-868d64d78-nkz4x     1/1     Running       0          39m
+result-5d57b59f4b-j4jx5   1/1     Running       0          39m
+vote-94849dc97-w6wxr      1/1     Running       0          3m15s
+worker-dd46d7584-rp9h7    0/1     Error         0          101s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running   0          47s
+redis-868d64d78-nkz4x     1/1     Running   0          39m
+result-5d57b59f4b-j4jx5   1/1     Running   0          39m
+vote-94849dc97-w6wxr      1/1     Running   0          3m24s
+worker-dd46d7584-rp9h7    1/1     Running   1          110s
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running   0          49s
+redis-868d64d78-nkz4x     1/1     Running   0          39m
+result-5d57b59f4b-j4jx5   1/1     Running   0          39m
+vote-94849dc97-w6wxr      1/1     Running   0          3m26s
+worker-dd46d7584-rp9h7    1/1     Running   1          112s
+[root@ip-172-31-30-193 k8s-specifications]#
+
+After deleting voting and worker pod, new pods getting created automatically and there is no change in result pod behavior.
+When db pod is deleted, result pod stops working and does not update result
+To make result pod update result, i deleted result pod which created new result pod that got sync with new db pd 
+
+[root@ip-172-31-30-193 k8s-specifications]# kubectl delete po result-5d57b59f4b-j4jx5
+pod "result-5d57b59f4b-j4jx5" deleted
+^C
+[root@ip-172-31-30-193 k8s-specifications]# kubectl get po
+NAME                      READY   STATUS              RESTARTS   AGE
+db-b54cd94f4-2l6kd        1/1     Running             0          5m3s
+redis-868d64d78-nkz4x     1/1     Running             0          43m
+result-5d57b59f4b-j4jx5   1/1     Terminating         0          43m
+result-5d57b59f4b-rbrx7   0/1     ContainerCreating   0          10s
+vote-94849dc97-w6wxr      1/1     Running             0          7m40s
+worker-dd46d7584-rp9h7    1/1     Running             1          6m6s
+[root@ip-172-31-30-193 k8s-specifications]#
+
+This course was very helpful in understanding the concepts of K8. Thanks.
