@@ -1,0 +1,52 @@
+Assignment No 1 - ReplicaSet
+A. apiVersion is v1 in kubia-rc.yaml but apiVersion is apps/v1 in kubia-replicaset.yaml
+
+B. [root@ip-172-31-30-193 05-services]# kubectl apply -f kubia-replicaset.yaml
+replicaset.apps/kubia created
+[root@ip-172-31-30-193 05-services]# kubectl get rs
+NAME    DESIRED   CURRENT   READY   AGE
+kubia   3         3         2       9s
+[root@ip-172-31-30-193 05-services]# kubectl get po
+NAME          READY   STATUS    RESTARTS   AGE
+kubia-7p9tj   1/1     Running   0          13s
+kubia-lz7lh   1/1     Running   0          13s
+kubia-n4fj8   1/1     Running   0          13s
+[root@ip-172-31-30-193 05-services]#
+
+C.[root@ip-172-31-30-193 05-services]# kubectl apply -f kubia-svc.yaml
+service/kubia2 created
+[root@ip-172-31-30-193 05-services]#
+[root@ip-172-31-30-193 05-services]# kubectl get svc
+NAME     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+db       ClusterIP   10.102.90.25     <none>        5432/TCP         3h49m
+kubia2   ClusterIP   10.99.10.99      <none>        80/TCP           4h52m
+redis    ClusterIP   10.108.117.242   <none>        6379/TCP         3h49m
+result   NodePort    10.100.162.146   <none>        5001:31001/TCP   3h49m
+vote     NodePort    10.100.95.150    <none>        5000:31000/TCP   3h49m
+[root@ip-172-31-30-193 05-services]# 
+[root@ip-172-31-30-193 05-services]# curl 10.99.10.99:80
+You've hit kubia-9vhjt
+[root@ip-172-31-30-193 05-services]#
+
+D.[root@ip-172-31-30-193 05-services]#  kubectl label po kubia-25xxw app=mavenir --overwrite
+pod/kubia-25xxw labeled
+[root@ip-172-31-30-193 05-services]# kubectl get po
+NAME                                               READY   STATUS              RESTARTS   AGE
+batch-job-every-fifteen-minutes-1656939600-p4rnc   0/1     Completed           0          33m
+batch-job-every-fifteen-minutes-1656940500-77xnr   0/1     Completed           0          18m
+batch-job-every-fifteen-minutes-1656941400-fcgb7   0/1     Completed           0          3m21s
+db-b54cd94f4-r8kbb                                 1/1     Running             0          6h30m
+kubia-25xxw                                        1/1     Running             0          7h4m
+kubia-9vhjt                                        1/1     Running             0          7h4m
+kubia-rvvt6                                        0/1     ContainerCreating   0          3s
+kubia-zpmxh                                        1/1     Running             0          7h4m
+redis-868d64d78-p7kns                              1/1     Running             0          6h35m
+result-5d57b59f4b-gqtb2                            1/1     Running             0          6h9m
+vote-94849dc97-gjpkj                               1/1     Running             0          6h33m
+worker-dd46d7584-8d2rr                             1/1     Running             1          6h32m
+[root@ip-172-31-30-193 05-services]# 
+
+
+
+
+
